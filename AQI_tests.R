@@ -14,7 +14,7 @@ head(aqiByState)  # checking the aggregation - seems to have worked fine
 # make lists of states in each region of the US - these will be used later to test for aqi by region
 # information about the regions of the US are from this site: https://www.mappr.co/political-maps/us-regions-map/
 west = c("California", "Colorado", "Nevada", "Hawaii", "Alaska", "Oregon", "Utah", "Idaho", "Montana", "Wyoming", "Washington")
-midwest = c("Minnesota", "Wisconsin", "Illinois", "Illinois", "Illinois", "Michigan", "Missouri", "Iowa", "Kansas", "Nebraska", "North Dakota", "South Dakota")
+midwest = c("Minnesota", "Wisconsin", "Illinois", "Ohio", "Indiana", "Michigan", "Missouri", "Iowa", "Kansas", "Nebraska", "North Dakota", "South Dakota")
 southwest = c("New Mexico", "Arizona", "Oklahoma", "Texas")
 southeast = c("Georgia", "North Carolina", "South Carolina", "Virginia", "West Virginia", "Kentucky", "Tennessee", "Mississippi", "Alabama", "Delaware", "Maryland", "Florida", "Louisiana", "Arkansas")
 northeast = c("Massachusetts", "Rhode Island", "Connecticut", "Vermont", "New Hampshire", "Maine", "Pennsylvania", "New Jersey", "New York")
@@ -57,10 +57,8 @@ t.test(aqiW$Median.AQI, aqiSE$Median.AQI)
 ############################### FINAL THOUGHTS ##############################################################
 # Honestly, there does not seem to a significant difference in any of the fields across the regions.
 # We can maybe make some conclusions saying that the lack of significant variance is probably because most 
-# regions of the US have a simlar number of big cities, farmland, etc, so any drastic differences in smaller
+# regions of the US have a similar number of big cities, farmland, etc, so any drastic differences in smaller
 # sub-regions gets blurred when we look at only the five big regions.
 # We could do a similar thing with smaller regions if we want to take a closer look
-
-
 
 
