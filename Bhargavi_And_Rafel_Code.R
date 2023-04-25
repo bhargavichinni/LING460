@@ -4,6 +4,7 @@ library(stringr)
 library(tidyverse)
 library(dplyr)
 library(car)
+library(stargazer)
 
 #################################### Bhargavi's tests:  ##############################################
 aqi <- read.csv("income_mortality_aqi.csv", header = TRUE, sep = ",")
@@ -42,7 +43,10 @@ t.test(aqiW$Median.AQI, aqiSE$Median.AQI)
 
 ###################################### Rafel's tests:  ##############################################
 data <- read_csv("final_dataset/Data/output/income_mortality_aqi.csv")
-data <- data %>%select(-c(FIPS, subregion, STATE_FIPS, State, County, County, CNTY_FIPS))
+
+# filtering for the model 
+data <- data %>%
+  select(-c(FIPS, subregion, STATE_FIPS, State, County, County, CNTY_FIPS))
 
 # cleaning the rank column to only include the state's ranking
 data$Rank.within.US <- data$Rank.within.US %>%
@@ -53,11 +57,12 @@ data$Rank.within.US <- data$Rank.within.US %>%
 full <- lm(Deaths ~ region + Good.Days + Moderate.Days + Unhealthy.for.Sensitive.Groups.Days + Unhealthy.Days + Very.Unhealthy.Days + Hazardous.Days + Median.AQI + Days.CO + Days.NO2 + Days.Ozone + Days.PM2.5 + Value..Dollars., data = data)
 summary(full)
 # statistically significant variables are moderate days, unhealthy for sensitive group days, very unhealthy days, hazardous days and median income
+
 # checking for multicollinearity 
 car::vif(full)
 # looks like region is colinear and so is median AQI and days ozone
 
-# first, adding a region column to the data using the region vectors above
+# first, adding a region column to the data 
 data <- data %>% 
   mutate(geo = 
            case_when(region %in% west ~ "W",
@@ -74,18 +79,23 @@ data <- data %>%
 mod2 <- lm(Deaths ~ Good.Days + Moderate.Days + Unhealthy.for.Sensitive.Groups.Days + Unhealthy.Days + Very.Unhealthy.Days + Hazardous.Days + Median.AQI + Days.CO + Days.NO2 + Days.Ozone + Days.PM2.5 + Value..Dollars. + factor(geo), data = data)
 summary(mod2)
 # moderate days, unhealthy for sensitive, very unhealthy, hazardous, median income, NE, SE, and W are statistically significant 
+
 # checking multicollinearity again 
 car::vif(mod2)
 # looks like days ozone is colinear 
+
 # redoing the model without days ozone 
 mod3 <- lm(Deaths ~ Good.Days + Moderate.Days + Unhealthy.for.Sensitive.Groups.Days + Unhealthy.Days + Very.Unhealthy.Days + Hazardous.Days + Median.AQI + Days.CO + Days.NO2 + Days.PM2.5 + Value..Dollars. + factor(geo), data = data)
 summary(mod3)
 # moderate days, unhealthy for sensitive days, very unhealthy, hazardous, median income, NE, SE, and W are stat sig
+
 # checking multicollinearity again 
 car::vif(mod3)
 # looks good
+
 # looking for interactions to add to the final model 
 add1(mod3, scope = .~. + .^2, test="F")
+
 # sorting these interactions to put stat sig p values on top 
 add1.test <- add1(mod3, scope = .~. + .^2, test="F")
 add1.test[order(add1.test$`Pr(>F)`),]
@@ -93,8 +103,10 @@ add1.test[order(add1.test$`Pr(>F)`),]
 mod4 <- lm(Deaths ~ Good.Days + Moderate.Days + Unhealthy.for.Sensitive.Groups.Days + Unhealthy.Days + Very.Unhealthy.Days + Hazardous.Days * Value..Dollars. + Median.AQI + Days.CO + Days.NO2 + Days.PM2.5 + factor(geo), data = data)
 summary(mod4)
 # is SS but the effect is very low
+
 # lets try unhealthy days and geographic region as the interaction 
 mod5 <- lm(Deaths ~ Good.Days + Moderate.Days + Unhealthy.for.Sensitive.Groups.Days + Unhealthy.Days * factor(geo) + Very.Unhealthy.Days + Hazardous.Days + Value..Dollars. + Median.AQI + Days.CO + Days.NO2 + Days.PM2.5, data = data)
 summary(mod5)
 # looks like the interaction effect is SS for all regions and causes a huge difference
 # this will be our final model 
+final_reg_table <- stargazer(mod5, type = "html", title = "Regression Results", align = TRUE, style = "qje", out = "LING_regression_table.html")
